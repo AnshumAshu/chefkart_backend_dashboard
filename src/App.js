@@ -1,25 +1,51 @@
-import logo from './logo.svg';
+import React, { lazy, useEffect, useState } from 'react';
 import './App.css';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { themeChange } from 'theme-change';
+
+import initializeApp from './app/init';
+import { AuthProvider } from './app/AuthContext';
+import PrivateRoute from './app/PrivateRoute';
+
+const Layout = lazy(() => import('./containers/Layout'));
+const Login = lazy(() => import('./pages/Login'));
+
+initializeApp();
 
 function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        themeChange(false);
+
+        setTimeout(() => {
+            setLoading(false);
+        }, 500); // Simulate loading delay
+    }, []);
+
+    if (loading) return <div>Loading...</div>;
+
+    return (
+        <AuthProvider>
+            <Router>
+                <Routes>
+                    <Route path="/" element={<Login />} />
+                    
+                    
+                    <Route
+                        path="/app/*"
+                        element={
+                            <PrivateRoute>
+                                <Layout />
+                            </PrivateRoute>
+                        }
+                    />
+
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+            </Router>
+        </AuthProvider>
+    );
 }
 
 export default App;
